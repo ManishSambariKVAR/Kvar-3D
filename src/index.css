@@ -1,0 +1,82 @@
+:root {
+  color: #e2e8f0;
+  background: #020617;
+  font-family: 'Avenir Next', 'Segoe UI', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.14), transparent 24%),
+    radial-gradient(circle at 80% 20%, rgba(251, 113, 133, 0.18), transparent 20%),
+    linear-gradient(180deg, #08101d 0%, #020617 60%, #01030a 100%);
+}
+
+canvas {
+  display: block;
+}
+
+.scene-shell {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+}
+
+.scene-copy {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 360px;
+  padding: 32px;
+  pointer-events: none;
+}
+
+.scene-copy p {
+  margin: 0 0 12px;
+  color: #7dd3fc;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.scene-copy h1 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: clamp(2.5rem, 5vw, 4.75rem);
+  letter-spacing: -0.06em;
+  line-height: 0.94;
+}
+
+.scene-copy span {
+  display: block;
+  margin-top: 14px;
+  color: rgba(226, 232, 240, 0.76);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .scene-copy {
+    max-width: 270px;
+    padding: 24px;
+  }
+
+  .scene-copy h1 {
+    font-size: clamp(2rem, 14vw, 3.2rem);
+  }
+}
