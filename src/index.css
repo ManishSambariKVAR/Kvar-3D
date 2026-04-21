@@ -1,82 +1,111 @@
-:root {
-  color: #e2e8f0;
-  background: #020617;
-  font-family: 'Avenir Next', 'Segoe UI', sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+
+  /* Premium Apple-style Palette */
+  --color-accent: #0066cc;
+  /* Apple Blue */
+  --color-accent-hover: #0071e3;
+  --color-accent-light: #5ac8fa;
+  --color-warning: #ff9500;
+
+  /* Semantic Light Mode Default (Clean, airy) */
+  --color-surface: #ffffff;
+  --color-surface-2: #f2f2f7;
+  /* Very light subtle gray */
+  --color-card: #ffffff;
+  --color-card-hover: #f5f5f7;
+  --color-heading: #1d1d1f;
+  /* Almost black */
+  --color-muted: #86868b;
+  /* Soft gray */
+  --color-border: #e5e5ea;
 }
 
-* {
-  box-sizing: border-box;
+/* ── Dark theme overrides ── */
+[data-theme="dark"] {
+  --color-surface: #000000;
+  --color-surface-2: #1c1c1e;
+  --color-card: #1c1c1e;
+  --color-card-hover: #2c2c2e;
+  --color-heading: #f5f5f7;
+  --color-muted: #86868b;
+  --color-border: #38383a;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
+/* ── Base ── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body,
+  #root {
+    @apply w-full min-h-screen m-0;
+  }
+
+  body {
+    @apply bg-surface text-muted antialiased transition-colors duration-500;
+    letter-spacing: -0.01em;
+  }
+
+  canvas {
+    @apply block;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 12px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+  }
 }
 
-body {
+/* Subtle gradients for background flair */
+.bg-subtle-gradient {
+  background: radial-gradient(circle at 50% -20%, rgba(0, 102, 204, 0.08) 0%, rgba(255, 255, 255, 0) 60%);
+}
+
+[data-theme="dark"] .bg-subtle-gradient {
+  background: radial-gradient(circle at 50% -20%, rgba(0, 102, 204, 0.15) 0%, rgba(0, 0, 0, 0) 60%);
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Line clamp utility */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top, rgba(34, 211, 238, 0.14), transparent 24%),
-    radial-gradient(circle at 80% 20%, rgba(251, 113, 133, 0.18), transparent 20%),
-    linear-gradient(180deg, #08101d 0%, #020617 60%, #01030a 100%);
 }
 
-canvas {
-  display: block;
+/* Premium Buttons */
+.btn-primary {
+  @apply inline-flex justify-center items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-sm tracking-wide px-7 py-3 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md shadow-accent/20 hover:shadow-xl hover:shadow-accent/40 hover:-translate-y-0.5 active:scale-95;
 }
 
-.scene-shell {
-  position: relative;
-  width: 100%;
-  height: 100svh;
+.btn-secondary {
+  @apply inline-flex justify-center items-center gap-2 bg-white/60 dark:bg-black/60 backdrop-blur-md border border-border text-heading font-medium text-sm tracking-wide px-7 py-3 rounded-full hover:bg-surface-2 transition-all duration-300 hover:-translate-y-0.5 active:scale-95;
 }
 
-.scene-copy {
-  position: absolute;
-  top: 0;
-  left: 0;
-  max-width: 360px;
-  padding: 32px;
-  pointer-events: none;
-}
-
-.scene-copy p {
-  margin: 0 0 12px;
-  color: #7dd3fc;
-  font-size: 0.72rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-}
-
-.scene-copy h1 {
-  margin: 0;
-  color: #f8fafc;
-  font-size: clamp(2.5rem, 5vw, 4.75rem);
-  letter-spacing: -0.06em;
-  line-height: 0.94;
-}
-
-.scene-copy span {
-  display: block;
-  margin-top: 14px;
-  color: rgba(226, 232, 240, 0.76);
-  font-size: 0.95rem;
-}
-
-@media (max-width: 640px) {
-  .scene-copy {
-    max-width: 270px;
-    padding: 24px;
-  }
-
-  .scene-copy h1 {
-    font-size: clamp(2rem, 14vw, 3.2rem);
-  }
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 0.7; transform: translateX(-50%) translateY(4px); }
 }
