@@ -207,8 +207,77 @@ const SCENES: Scene[] = [
     },
 ];
 
-const TOTAL_FRAMES = 200;
+const TOTAL_FRAMES = 210;
 const SCROLL_HEIGHT = TOTAL_FRAMES * 8; // vh
+
+// Tab navigation
+interface Tab {
+    id: string;
+    label: string;
+    targetFrame: number;
+    frameRange: [number, number];
+}
+
+const TABS: Tab[] = [
+    { id: 'overview', label: 'Overview', targetFrame: 0, frameRange: [0, 20] },
+    { id: 'lcd', label: 'LCD Display', targetFrame: 15, frameRange: [7, 35] },
+    { id: 'pm', label: 'PM Sensor', targetFrame: 45, frameRange: [35, 70] },
+    { id: 'temp', label: 'Temp & Humidity', targetFrame: 80, frameRange: [72, 90] },
+    { id: 'connectivity', label: 'Connectivity', targetFrame: 145, frameRange: [130, 165] },
+];
+
+// Hotspot zones
+type ZoneType = 'display' | 'pm' | 'temp' | null;
+
+interface Hotspot {
+    zone: ZoneType;
+    x: { min: number; max: number };
+    y: { min: number; max: number };
+    targetFrame: number;
+    label: string;
+}
+
+const HOTSPOTS: Hotspot[] = [
+    {
+        zone: 'pm',
+        x: { min: 0.33, max: 0.45 },
+        y: { min: 0.30, max: 0.60 },
+        targetFrame: 20,
+        label: 'PM Sensor'
+    },
+    {
+        zone: 'display',
+        x: { min: 0.45, max: 0.57 },
+        y: { min: 0.30, max: 0.60 },
+        targetFrame: 40,
+        label: 'LCD Display'
+    },
+    {
+        zone: 'temp',
+        x: { min: 0.57, max: 0.69 },
+        y: { min: 0.30, max: 0.60 },
+        targetFrame: 80,
+        label: 'Temp Sensor'
+    }
+];
+
+const ZONE_CONTENT: Record<Exclude<ZoneType, null>, { title: string; description: string; specs: string[] }> = {
+    display: {
+        title: '16×2 LCD Display',
+        description: 'High-contrast display showing real-time sensor readings and system status.',
+        specs: ['Live AQI readings', 'Menu navigation', 'Backlit for night visibility', 'Auto-dimming'],
+    },
+    pm: {
+        title: 'PM2.5 & PM10 Sensor',
+        description: 'Laser scattering technology for precise particulate matter detection.',
+        specs: ['Range: 0–999 μg/m³', 'Accuracy: ±10%', 'Response time: <10s', 'Laser-based detection'],
+    },
+    temp: {
+        title: 'Temperature & Humidity',
+        description: 'Digital precision sensor for environmental monitoring.',
+        specs: ['Temp: -40°C to 80°C', 'Humidity: 0–100% RH', 'Accuracy: ±0.3°C / ±2%', 'Auto-calibrated'],
+    },
+};
 
 // MAIN COMPONENT
 export default function AQMTraceShowcase() {
@@ -220,6 +289,9 @@ export default function AQMTraceShowcase() {
     const [loading, setLoading] = useState(true);
     const [loadProgress, setLoadProgress] = useState(0);
     const [currentFrame, setCurrentFrame] = useState(0);
+    const [isZooming, setIsZooming] = useState(false);
+    const [activeZone, setActiveZone] = useState<ZoneType>(null);
+    const animationRef = useRef<number>(0);
 
     // Preload frames
     useEffect(() => {
@@ -262,26 +334,92 @@ export default function AQMTraceShowcase() {
         ctx.drawImage(img, (canvas.width - sw) / 2, (canvas.height - sh) / 2, sw, sh);
     }, []);
 
-    // Scroll → frame
+    // Smooth frame animation
+    const animateToFrame = useCallback((targetFrame: number) => {
+    setIsZooming(true);
+    cancelAnimationFrame(animationRef.current); // cancel any ongoing animation
+    
+    const startFrame = currentFrame;
+    const distance = Math.abs(targetFrame - startFrame);
+    
+    // Scale duration: min 600ms, max 2000ms based on distance
+    const duration = Math.min(600 + (distance / TOTAL_FRAMES) * 1800, 2000);
+    
+    const startTime = performance.now();
+
+    const animate = (time: number) => {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const newFrame = Math.round(startFrame + (targetFrame - startFrame) * eased);
+
+        setCurrentFrame(newFrame);
+
+        if (progress < 1) {
+            animationRef.current = requestAnimationFrame(animate);
+        } else {
+            setCurrentFrame(targetFrame); // ensure we land exactly
+            setIsZooming(false);
+        }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+}, [currentFrame]);
+
+    // Canvas click handler
+    const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+        console.log("CLICKED");
+
+        if (isZooming) return;
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+
+        console.log("x:", x, "y:", y);
+        // Check hotspots
+        for (const hotspot of HOTSPOTS) {
+            if (x >= hotspot.x.min && x <= hotspot.x.max && y >= hotspot.y.min && y <= hotspot.y.max) {
+                setActiveZone(hotspot.zone);
+                animateToFrame(hotspot.targetFrame);
+                return;
+            }
+        }
+        // Click outside - reset
+        if (activeZone) {
+            setActiveZone(null);
+        }
+    }
+        , [isZooming, activeZone, animateToFrame]);
+
+    // Scroll → frame (disabled during zoom)
     useEffect(() => {
-        if (loading) return;
-        const onScroll = () => {
-            cancelAnimationFrame(rafRef.current);
-            rafRef.current = requestAnimationFrame(() => {
-                if (!containerRef.current) return;
-                const rect = containerRef.current.getBoundingClientRect();
-                const scrollable = containerRef.current.offsetHeight - window.innerHeight;
-                const progress = Math.max(0, Math.min(-rect.top / scrollable, 1));
-                setCurrentFrame(Math.min(Math.floor(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1));
-            });
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        onScroll();
-        return () => {
-            window.removeEventListener('scroll', onScroll);
-            cancelAnimationFrame(rafRef.current);
-        };
-    }, [loading]);
+    if (loading || isZooming) return;
+    const onScroll = () => {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const scrollable = containerRef.current.offsetHeight - window.innerHeight;
+            const progress = Math.max(0, Math.min(-rect.top / scrollable, 1));
+            setCurrentFrame(Math.min(Math.floor(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1));
+        });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // ← removed onScroll() call here
+    return () => {
+        window.removeEventListener('scroll', onScroll);
+        cancelAnimationFrame(rafRef.current);
+    };
+}, [loading, isZooming]);
+
+    // Cleanup animation on unmount
+    useEffect(() => {
+        return () => cancelAnimationFrame(animationRef.current);
+    }, []);
 
     useEffect(() => { drawFrame(currentFrame); }, [currentFrame, drawFrame]);
     useEffect(() => {
@@ -320,7 +458,11 @@ export default function AQMTraceShowcase() {
                     </div>
                 ) : (
                     <>
-                        <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 1, mixBlendMode: 'normal' }} />
+                        <canvas
+                            ref={canvasRef}
+                            onClick={handleCanvasClick}
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 1, mixBlendMode: 'normal', cursor: isZooming ? 'wait' : 'pointer' }}
+                        />
 
 
                         {/* Vignette overlay */}
@@ -338,7 +480,7 @@ export default function AQMTraceShowcase() {
 
                         {/* Scroll hint */}
                         <div style={{
-                            position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', zIndex: 15,
+                            position: 'absolute', bottom: '6rem', left: '50%', transform: 'translateX(-50%)', zIndex: 15,
                             opacity: currentFrame < 3 ? 1 : 0, transition: 'opacity 0.6s ease',
                             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
                         }}>
@@ -346,6 +488,62 @@ export default function AQMTraceShowcase() {
                                 <div style={{ position: 'absolute', top: 6, left: '50%', transform: 'translateX(-50%)', width: 4, height: 8, borderRadius: 2, background: 'rgba(255,255,255,0.6)', animation: 'aqmBounce 1.5s ease-in-out infinite' }} />
                             </div>
                             <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Scroll to explore</span>
+                        </div>
+
+                        {/* Tab Navigation Bar */}
+                        <div style={{
+                            position: 'fixed',
+                            bottom: '2rem',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            zIndex: 100,
+                            display: 'flex',
+                            gap: '0.5rem',
+                            background: 'rgba(8, 8, 12, 0.85)',
+                            backdropFilter: 'blur(20px)',
+                            WebkitBackdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(100,200,255,0.25)',
+                            borderRadius: '3rem',
+                            padding: '0.5rem',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 40px rgba(100,200,255,0.1)',
+                        }}>
+                            {TABS.map((tab) => {
+                                const isActive = currentFrame >= tab.frameRange[0] && currentFrame <= tab.frameRange[1];
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => !isZooming && animateToFrame(tab.targetFrame)}
+                                        disabled={isZooming}
+                                        style={{
+                                            padding: '0.6rem 1.2rem',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 700,
+                                            color: isActive ? '#000' : 'rgba(255,255,255,0.7)',
+                                            background: isActive ? '#64c8ff' : 'transparent',
+                                            border: 'none',
+                                            borderRadius: '2rem',
+                                            cursor: isZooming ? 'wait' : 'pointer',
+                                            transition: 'all 0.3s cubic-bezier(.16,1,.3,1)',
+                                            whiteSpace: 'nowrap',
+                                            boxShadow: isActive ? '0 4px 16px rgba(100,200,255,0.4)' : 'none',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isActive && !isZooming) {
+                                                e.currentTarget.style.background = 'rgba(100,200,255,0.15)';
+                                                e.currentTarget.style.color = '#64c8ff';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isActive) {
+                                                e.currentTarget.style.background = 'transparent';
+                                                e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                                            }
+                                        }}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         {/* Render active scenes */}
@@ -367,6 +565,103 @@ export default function AQMTraceShowcase() {
                                 </div>
                             );
                         })}
+
+                        {/* Floating zone panel */}
+                        {activeZone && (
+                            <div style={{
+                                position: 'fixed',
+                                bottom: 0,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '90%',
+                                maxWidth: 600,
+                                zIndex: 100,
+                                animation: 'slideUp 0.4s cubic-bezier(.16,1,.3,1)',
+                            }}>
+                                <div style={{
+                                    background: 'rgba(8, 8, 12, 0.92)',
+                                    backdropFilter: 'blur(40px)',
+                                    WebkitBackdropFilter: 'blur(40px)',
+                                    border: '1.5px solid rgba(100,200,255,0.3)',
+                                    borderRadius: '1.5rem 1.5rem 0 0',
+                                    padding: '1.5rem 2rem 2rem',
+                                    boxShadow: '0 -8px 40px rgba(0,0,0,0.6), 0 0 60px rgba(100,200,255,0.15)',
+                                    position: 'relative',
+                                }}>
+                                    {/* Close button */}
+                                    <button
+                                        onClick={() => setActiveZone(null)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '1rem',
+                                            right: '1rem',
+                                            background: 'rgba(255,255,255,0.1)',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            borderRadius: '50%',
+                                            width: 32,
+                                            height: 32,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            color: '#fff',
+                                            fontSize: '1.2rem',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+                                            e.currentTarget.style.transform = 'scale(1.1)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                        }}
+                                    >
+                                        ×
+                                    </button>
+
+                                    {/* Content */}
+                                    <div style={{ paddingRight: '2rem' }}>
+                                        <h3 style={{
+                                            fontSize: '1.4rem',
+                                            fontWeight: 800,
+                                            color: '#64c8ff',
+                                            margin: '0 0 0.5rem',
+                                            letterSpacing: '-0.01em',
+                                        }}>
+                                            {ZONE_CONTENT[activeZone].title}
+                                        </h3>
+                                        <p style={{
+                                            fontSize: '0.9rem',
+                                            color: 'rgba(255,255,255,0.7)',
+                                            margin: '0 0 1rem',
+                                            lineHeight: 1.5,
+                                        }}>
+                                            {ZONE_CONTENT[activeZone].description}
+                                        </p>
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                                            gap: '0.6rem',
+                                        }}>
+                                            {ZONE_CONTENT[activeZone].specs.map((spec, i) => (
+                                                <div key={i} style={{
+                                                    background: 'rgba(100,200,255,0.08)',
+                                                    border: '1px solid rgba(100,200,255,0.2)',
+                                                    borderRadius: '0.5rem',
+                                                    padding: '0.6rem 0.8rem',
+                                                    fontSize: '0.75rem',
+                                                    color: 'rgba(255,255,255,0.85)',
+                                                    textAlign: 'center',
+                                                }}>
+                                                    {spec}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
@@ -384,6 +679,10 @@ export default function AQMTraceShowcase() {
         @keyframes aqmGlowPulse {
           0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
           50% { opacity: 0.6; transform: translateX(-50%) scale(1.08); }
+        }
+        @keyframes slideUp {
+          from { transform: translateX(-50%) translateY(100%); opacity: 0; }
+          to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
         .aqm-dot-grid {
           background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
