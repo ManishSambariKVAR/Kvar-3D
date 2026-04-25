@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import SectionHeading from '../components/SectionHeading';
 import StatsCounter from '../components/StatsCounter';
-import ModelViewer from '../components/ModelViewer';
+import ModelViewer from '../three/ModelViewer';
 
 const stats = [
     { end: 20, suffix: '+', label: 'Years Experience' },

@@ -5,17 +5,14 @@ import ampereHourMeterImg from '../assets/Ampere_hour_meters.png';
 import digitalClocksImg from '../assets/digital_clock.png';
 import industrialDisplaysImg from '../assets/Status.png';
 import transportTrafficImg from '../assets/Environmental Monitoring Systems.png';
-import andonImg from '../assets/Status.png';
 import priceRateImg from '../assets/Petrol_rate_display.png';
 import specialCountersImg from '../assets/Drink-Dispensing-Counter.png';
 import airQualityMonitorImg from '../assets/Environmental Monitoring Systems.png';
 import ledDisplayBoardImg from '../assets/LED Display Board.png';
 import scoreBoardImg from '../assets/Score Display Board.png';
-import iotImg from '../assets/Iot.png';
 import queueManagementImg from '../assets/Queue Management.png';
 import flowTotalizerImg from '../assets/Flow Totalizer.png';
 import digitalCounterImg from '../assets/Digital Counter.png';
-import outdoorLedImg from '../assets/Outdoor Led Display.png';
 import machineVisionImg from '../assets/Machine Vision System.png';
 import advertisingServicesImg from '../assets/Indoor Advertising Display 2.5.png';
 import aqmSolutionImg from '../assets/Environmental Monitoring Systems.png';
@@ -52,9 +49,10 @@ export const products: Product[] = [
             'Electronic instruments that capture and record process data such as temperature, humidity, pressure, flow, voltage, and current — available with multi-channel options and connectivity.',
         category: 'Loggers & Meters',
         icon: 'Database',
-        modelPath: null,
+        modelPath: '',
         imageUrl: dataLoggersImg,
     },
+    
     {
         id: 'indicators-display',
         name: 'Indicators Display',
@@ -62,18 +60,8 @@ export const products: Product[] = [
             'A range of industrial indicator displays including wind speed, Modbus LED, Profibus LED, digital temperature indicators, and large LED displays.',
         category: 'Displays',
         icon: 'Monitor',
-        modelPath: '/162__lcd_display.glb',
+        modelPath: '',
         imageUrl: indicatorsImg,
-    },
-    {
-        id: 'information-display',
-        name: 'Information Display',
-        description:
-            'Electronic information displays to communicate real-time numeric/alphanumeric messages for industries and commercial premises — indoor/outdoor and multiple communication interfaces.',
-        category: 'Displays',
-        icon: 'Info',
-        modelPath: '/lcd_display.glb',
-        imageUrl: informationDisplayImg,
     },
     {
         id: 'ampere-hour-meter',
@@ -82,7 +70,7 @@ export const products: Product[] = [
             'Instruments for battery monitoring and electroplating applications with versatile counting, relay outputs, programmable shunt, and power-fail retention.',
         category: 'Loggers & Meters',
         icon: 'Zap',
-        modelPath: null,
+        modelPath: '',
         imageUrl: ampereHourMeterImg,
     },
     {
@@ -96,34 +84,14 @@ export const products: Product[] = [
         imageUrl: digitalClocksImg,
     },
     {
-        id: 'industrial-displays',
-        name: 'Industrial Displays And Systems',
-        description:
-            'Custom-built industrial display systems designed for plant environments to collect, analyze and present real-time information — tailored to specific applications.',
-        category: 'Displays',
-        icon: 'LayoutDashboard',
-        modelPath: '/display_monitor_untextured.glb',
-        imageUrl: industrialDisplaysImg,
-    },
-    {
         id: 'transport-traffic',
         name: 'Transport & Traffic Displays',
         description:
             'Displays to guide, control, and manage transport/traffic by showing dynamic information in a quick, readable way — with central control and multiple communication options.',
         category: 'Displays',
         icon: 'Bus',
-        modelPath: null,
+        modelPath: '',
         imageUrl: transportTrafficImg,
-    },
-    {
-        id: 'andon-display',
-        name: 'Andon Production Display',
-        description:
-            'Visual control displays showing machine/line/process status to improve production efficiency with alerts, logging, reporting, and web/cloud enablement.',
-        category: 'Displays',
-        icon: 'BarChart3',
-        modelPath: null,
-        imageUrl: andonImg,
     },
     {
         id: 'price-rate-displays',
@@ -132,7 +100,7 @@ export const products: Product[] = [
             'Bright, eye-catching displays to show rates/prices in real-time for retail and commercial premises with multiple interfaces and easy updating.',
         category: 'Scoreboards & Signs',
         icon: 'IndianRupee',
-        modelPath: null,
+        modelPath: '',
         imageUrl: priceRateImg,
     },
     {
@@ -142,19 +110,19 @@ export const products: Product[] = [
             'Counters designed for specific applications where accurate counting is crucial — with sensor interfaces, relay outputs, and power-fail retention.',
         category: 'Counters & Timers',
         icon: 'Hash',
-        modelPath: null,
+        modelPath: '',
         imageUrl: specialCountersImg,
     },
     {
-        id: 'air-quality-monitor',
+        id: 'air-quality-monitor2',
         name: 'Air Quality Monitor',
         description:
             'Environmental monitoring products for air quality, dust monitoring, and air pollution monitoring applications.',
         category: 'Monitoring',
         icon: 'Wind',
-        modelPath: '/trace_bg.glb',
+        modelPath: '',
         imageUrl: airQualityMonitorImg,
-    },
+    },  
     {
         id: 'led-display-board',
         name: 'Led Display Board',
@@ -174,16 +142,6 @@ export const products: Product[] = [
         icon: 'Trophy',
         modelPath: null,
         imageUrl: scoreBoardImg,
-    },
-    {
-        id: 'iot-products',
-        name: 'IOT Products',
-        description:
-            'IoT-enabled devices that communicate over Ethernet/WiFi using standard protocols like MQTT/HTTP, enabling remote monitoring and control through web/mobile apps.',
-        category: 'IoT & Smart',
-        icon: 'Wifi',
-        modelPath: null,
-        imageUrl: iotImg,
     },
     {
         id: 'queue-management',
@@ -215,15 +173,6 @@ export const products: Product[] = [
         imageUrl: digitalCounterImg,
     },
     {
-        id: 'outdoor-led-display',
-        name: 'Outdoor Led Display',
-        description: 'LED display screen solutions designed for outdoor visibility and reliability.',
-        category: 'Scoreboards & Signs',
-        icon: 'Sun',
-        modelPath: null,
-        imageUrl: outdoorLedImg,
-    },
-    {
         id: 'machine-vision-system',
         name: 'Machine Vision System',
         description: 'Machine vision system solutions for industrial applications.',
@@ -248,7 +197,7 @@ export const products: Product[] = [
             'AQM systems for monitoring and displaying pollutants like PM2.5/PM10 and gases (CO₂, CO, NO, NOx, SOx) using sensors, data logger and display.',
         category: 'Monitoring',
         icon: 'Wind',
-        modelPath: null,
+        modelPath: '',
         imageUrl: aqmSolutionImg,
     },
     {

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import ModelViewer from '../components/ModelViewer';
+import ModelViewer from '../three/ModelViewer';
 
 export default function Hero() {
     return (

@@ -25,7 +25,7 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Products limit={8} showViewAll modelsOnly />
+      <Products limit={8} showViewAll  />
       <Features />
       <About />
       <Contact />

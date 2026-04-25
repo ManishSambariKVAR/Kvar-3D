@@ -25,12 +25,10 @@ export default function Navbar() {
 
     const handleClick = (href: string) => {
         setMobileOpen(false);
-        // If we're not on the homepage route, navigate there with a hash.
         if (location.pathname !== '/') {
             navigate({ pathname: '/', hash: href });
             return;
         }
-
         const el = document.querySelector(href);
         el?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -38,81 +36,100 @@ export default function Navbar() {
     return (
         <nav
             id="navbar"
-            className={`fixed left-0 right-0 z-50 transition-all duration-500 ${scrolled
-                    ? 'top-4 mx-4 max-w-7xl lg:mx-auto bg-surface/70 backdrop-blur-2xl border border-border/50 shadow-sm rounded-full py-3'
-                    : 'top-0 bg-transparent py-6 border-b-0'
-                }`}
+            className={`fixed left-0 right-0 z-50 transition-all duration-500 ${
+                scrolled
+                    ? 'top-3 mx-auto max-w-5xl px-4'
+                    : 'top-0 px-0'
+            }`}
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-                {/* Logo */}
-                <a
-                    href="#hero"
-                    onClick={(e) => { e.preventDefault(); handleClick('#hero'); }}
-                    className="flex items-center gap-2 group ml-2"
-                >
-                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center
-                          shadow-md shadow-accent/20 transition-all duration-300">
-                        <span className="text-white font-extrabold text-sm tracking-tighter">K</span>
-                    </div>
-                    <div className="flex flex-col leading-none">
-                        <span className="text-lg font-extrabold tracking-tight text-heading">KVAR</span>
-                        <span className="text-[9px] font-semibold tracking-[0.2em] uppercase text-muted">Technologies</span>
-                    </div>
-                </a>
-
-                {/* Desktop links */}
-                <div className="hidden md:flex items-center gap-1">
-                    {navLinks.map((link) => (
-                        <button
-                            key={link.href}
-                            onClick={() => handleClick(link.href)}
-                            className="px-4 py-2 rounded-lg text-sm font-medium text-muted
-                         hover:text-heading hover:bg-white/5 transition-all duration-200 cursor-pointer"
-                        >
-                            {link.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Right side */}
-                <div className="flex items-center gap-3">
-                    <ThemeToggle />
-
+            <div className={`transition-all duration-500 ${
+                scrolled
+                    ? 'bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl px-5 py-2.5 shadow-lg shadow-black/30'
+                    : 'bg-transparent px-8 py-4 max-w-7xl mx-auto'
+            }`}>
+                <div className="flex items-center justify-between">
+                    {/* Logo */}
                     <a
-                        href="#contact"
-                        onClick={(e) => { e.preventDefault(); handleClick('#contact'); }}
-                        className="hidden sm:inline-flex btn-primary !py-2.5 !px-6"
+                        href="#hero"
+                        onClick={(e) => { e.preventDefault(); handleClick('#hero'); }}
+                        className="flex items-center gap-3 group"
                     >
-                        Get a Quote
+                        <img
+                            src="/logo.png"
+                            alt="KVAR Logo"
+                            className="w-14 h-14 object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]"
+
+                        />
                     </a>
 
-                    {/* Mobile hamburger */}
-                    <button
-                        onClick={() => setMobileOpen((o) => !o)}
-                        className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-                        aria-label="Toggle menu"
-                    >
-                        {mobileOpen ? <X size={22} className="text-heading" /> : <Menu size={22} className="text-heading" />}
-                    </button>
+                    {/* Desktop links */}
+                    <div className="hidden md:flex items-center gap-0.5">
+                        {navLinks.map((link) => (
+                            <button
+                                key={link.href}
+                                onClick={() => handleClick(link.href)}
+                                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-white/50
+                                     hover:text-white hover:bg-white/8 transition-all duration-200 cursor-pointer
+                                     tracking-wide"
+                            >
+                                {link.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Right side */}
+                    <div className="flex items-center gap-2">
+                        <ThemeToggle />
+                        <a
+                            href="#contact"
+                            onClick={(e) => { e.preventDefault(); handleClick('#contact'); }}
+                            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold
+                                 bg-blue-600 hover:bg-blue-500 text-white
+                                 px-4 py-2 rounded-lg transition-all duration-200
+                                 shadow-md shadow-blue-600/30 hover:shadow-blue-500/40"
+                        >
+                            Get a Quote
+                        </a>
+                        <button
+                            onClick={() => setMobileOpen((o) => !o)}
+                            className="md:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                            aria-label="Toggle menu"
+                        >
+                            {mobileOpen
+                                ? <X size={18} className="text-white/70" />
+                                : <Menu size={18} className="text-white/70" />}
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {/* Mobile menu */}
-            <div
-                className={`md:hidden overflow-hidden transition-all duration-300 ${mobileOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
-                    }`}
-            >
-                <div className="px-4 pb-4 pt-2 space-y-1 bg-surface/95 backdrop-blur-xl border-t border-border mt-2">
+            <div className={`md:hidden overflow-hidden transition-all duration-300 mx-4 ${
+                mobileOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+                <div className="mt-1 bg-black/80 backdrop-blur-2xl border border-white/10
+                          rounded-2xl px-3 py-3 space-y-0.5">
                     {navLinks.map((link) => (
                         <button
                             key={link.href}
                             onClick={() => handleClick(link.href)}
-                            className="block w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-muted
-                         hover:text-heading hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                            className="block w-full text-left px-4 py-2.5 rounded-xl text-sm
+                                 font-medium text-white/60 hover:text-white hover:bg-white/8
+                                 transition-all duration-200 cursor-pointer"
                         >
                             {link.label}
                         </button>
                     ))}
+                    <div className="pt-2 px-2">
+                        <a
+                            href="#contact"
+                            onClick={(e) => { e.preventDefault(); handleClick('#contact'); }}
+                            className="block text-center text-xs font-semibold bg-blue-600
+                                 text-white px-4 py-2.5 rounded-xl"
+                        >
+                            Get a Quote
+                        </a>
+                    </div>
                 </div>
             </div>
         </nav>
